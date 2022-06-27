@@ -115,9 +115,9 @@ class ArvalAuthService
 
 	/**
 	 * @param callable|null $callback
-	 * @return bool
+	 * @return JsonResponse
 	 */
-    public function deleteUser(Callable $callback = null): bool
+    public function deleteUser(Callable $callback = null): JsonResponse
     {
 		$user = User::whereRaw('LOWER(email) = LOWER(?)', [request('email')])->first();
 		if(!$user) {
