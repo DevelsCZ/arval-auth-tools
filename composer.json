@@ -1,0 +1,16 @@
+{
+    "name": "arval-auth-tools",
+    "description": "Provides function for arval-auth implementation",
+    "type": "library",
+    "require": {
+        "php": ">=8.0"
+    },
+    "license": "proprietary",
+    "authors": [
+        {
+          "name": "Tomas Mleziva",
+          "email": "tomas@devels.cz"
+        }
+  ],
+  "minimum-stability": "dev"
+}
