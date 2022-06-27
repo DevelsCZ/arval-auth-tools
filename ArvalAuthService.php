@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace Mlezitom\ArvalAuthTools;
 
 use App\Exceptions\ApiException;
 use App\Models\Company;
