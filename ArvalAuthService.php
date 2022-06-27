@@ -66,6 +66,8 @@ class ArvalAuthService
             'degree_after' => $responseBody->user->degreeAfter,
             'company_id' => $company->id,
         ]);
+		$user->save();
+
         $appCode = config('arvalAuth.appCode');
         $role = Role::where('name', $responseBody->user->roles->$appCode)->first();
         $user->assignRole($role);
@@ -144,6 +146,50 @@ class ArvalAuthService
         if(!$responseBody->success) {
             throw new ApiException('Invalid username and/or password.');
         }
+        return $responseBody->success;
+    }
+
+	/**
+	 * @param User $user
+	 * @return bool|null
+	 */
+    public function refreshUser(User $user): ?bool
+    {
+        $apiResponse = Http::withHeaders(['X-Auth' => config('arvalAuth.token')])
+            ->get(
+                sprintf(
+					'%s/api/v1/user/%s',
+					config('arvalAuth.domains.' . Environment::getEnv()),
+					urlencode($user->email)
+				),
+            )
+            ->onError(function($response) {
+                dd($response);
+            });
+        ;
+        /**
+         * @var GuzzleHttp\Psr7\Response $apiResponse
+         */
+        if($apiResponse->status() != 200) {
+            throw new ApiException('Invalid response from arval-auth API.');
+        }
+        $responseBody = json_decode($apiResponse->body());
+        if($responseBody->error) {
+            throw new ApiException($responseBody->error);
+        }
+        if(!$responseBody->success) {
+            throw new ApiException('Unable to load user data from arval-auth API.');
+        }
+
+		$user->update([
+			'firstname' => $responseBody->user->firstname,
+			'lastname' => $responseBody->user->lastname,
+			'degree_before' => $responseBody->user->degreeBefore,
+			'degree_after' => $responseBody->user->degreeAfter,
+			'phone' => $responseBody->user->phone,
+			'company_id' => Company::where('slug', $responseBody->user->company)->value('id'),
+		]);
+
         return $responseBody->success;
     }
 
