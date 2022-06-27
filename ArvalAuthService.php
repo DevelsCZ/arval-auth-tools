@@ -69,8 +69,12 @@ class ArvalAuthService
 		$user->save();
 
         $appCode = config('arvalAuth.appCode');
-        $role = Role::where('name', $responseBody->user->roles->$appCode)->first();
-        $user->assignRole($role);
+		$roleCode = $responseBody->user->roles->$appCode;
+		if($roleCode == 'banned') {
+			return null;
+		}
+
+        $user->assignRole(Role::where('name', $roleCode)->first());
 
         return $user;
     }
