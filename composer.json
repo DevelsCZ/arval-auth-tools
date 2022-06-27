@@ -1,5 +1,5 @@
 {
-    "name": "mlezitom/arval-auth-tools",
+    "name": "develscz/arval-auth-tools",
     "description": "Provides function for arval-auth implementation",
     "type": "library",
     "require": {
