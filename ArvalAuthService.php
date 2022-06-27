@@ -94,6 +94,7 @@ class ArvalAuthService
                     'degreeBefore' => $user->degree_before,
                     'degreeAfter' => $user->degree_after,
                     'phone' => $user->phone,
+                    'role' => $user->roles()->value('name'),
                 ]),
                 'application/json'
             )
