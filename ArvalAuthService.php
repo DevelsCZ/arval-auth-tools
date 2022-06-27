@@ -113,6 +113,23 @@ class ArvalAuthService
         return $responseBody->success;
     }
 
+	/**
+	 * @param callable|null $callback
+	 * @return bool
+	 */
+    public function deleteUser(Callable $callback = null): bool
+    {
+		$user = User::whereRaw('LOWER(email) = LOWER(?)', [request('email')])->first();
+		if(!$user) {
+			return response()->json(['success' => false, 'error' => 'User not found.']);
+		}
+        $user->delete();
+		if($callback) {
+			$callback($user);
+		}
+		return response()->json(['success' => true, 'error' => null]);
+    }
+
     /**
      * @param User $user
      * @param string $oldPassword
