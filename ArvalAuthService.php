@@ -48,13 +48,20 @@ class ArvalAuthService
 
         // get/create local user entity
         $user = User::whereRaw('LOWER(email) = LOWER(?)', $email)->first();
-        $company = Company::where('slug', $responseBody->user->company ?: 'arval')->firstOrFail();
+		$companyID = null;
+		// not present in some projects
+		if(class_exists(Company::class)) {
+        	$companyID = Company::where('slug', $responseBody->user->company ?: 'arval')->value('id');
+		}
+
         if(!$user) {
             $user = new User([
                 'email' => strtolower($email),
                 'password' => Hash::make($password),
-                'company_id' => $company->id,
             ]);
+			if($companyID) {
+				$user->company_id = $companyID;
+			}
         }
 
         // update user with provided credentials
@@ -64,8 +71,12 @@ class ArvalAuthService
             'phone' => $responseBody->user->phone,
             'degree_before' => $responseBody->user->degreeBefore,
             'degree_after' => $responseBody->user->degreeAfter,
-            'company_id' => $company->id,
         ]);
+		if($companyID) {
+			$user->update([
+            	'company_id' => $companyID,
+			]);
+		}
 		$user->save();
 
         $appCode = config('arvalAuth.appCode');
@@ -209,8 +220,13 @@ class ArvalAuthService
 			'degree_before' => $responseBody->user->degreeBefore,
 			'degree_after' => $responseBody->user->degreeAfter,
 			'phone' => $responseBody->user->phone,
-			'company_id' => Company::where('slug', $responseBody->user->company)->value('id'),
 		]);
+		// not present in some projects
+		if(class_exists(Company::class)) {
+			$user->update([
+				'company_id' => Company::where('slug', $responseBody->user->company)->value('id'),
+			]);
+		}
 
         return $responseBody->success;
     }
