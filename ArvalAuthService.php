@@ -279,13 +279,6 @@ class ArvalAuthService
             throw new ApiException('Unable to load user data from arval-auth API.');
         }
 
-		$user->update([
-			'firstname' => $responseBody->user->firstname,
-			'lastname' => $responseBody->user->lastname,
-			'degree_before' => $responseBody->user->degreeBefore,
-			'degree_after' => $responseBody->user->degreeAfter,
-			'phone' => $responseBody->user->phone,
-		]);
 		// not present in some projects
 		if(class_exists(Company::class)) {
 			$user->update([
