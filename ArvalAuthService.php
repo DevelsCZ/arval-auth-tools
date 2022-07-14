@@ -163,6 +163,7 @@ class ArvalAuthService
                 sprintf('%s/api/v1/auth/change-password', config('arvalAuth.domains.' . Environment::getEnv()))
             )
             ->onError(function($response) {
+				report($response->__toString());
                 dd($response);
             });
         ;
@@ -197,8 +198,72 @@ class ArvalAuthService
 				),
             )
             ->onError(function($response) {
+				report($response->__toString());
                 dd($response);
-            });
+            })
+        ;
+        /**
+         * @var GuzzleHttp\Psr7\Response $apiResponse
+         */
+        if($apiResponse->status() != 200) {
+            throw new ApiException('Invalid response from arval-auth API.');
+        }
+        $responseBody = json_decode($apiResponse->body());
+        if($responseBody->error) {
+            throw new ApiException($responseBody->error);
+        }
+        if(!$responseBody->success) {
+            throw new ApiException('Unable to load user data from arval-auth API.');
+        }
+
+		$user->update([
+			'firstname' => $responseBody->user->firstname,
+			'lastname' => $responseBody->user->lastname,
+			'degree_before' => $responseBody->user->degreeBefore,
+			'degree_after' => $responseBody->user->degreeAfter,
+			'phone' => $responseBody->user->phone,
+		]);
+		// not present in some projects
+		if(class_exists(Company::class)) {
+			$user->update([
+				'company_id' => Company::where('slug', $responseBody->user->company)->value('id'),
+			]);
+		}
+
+        return $responseBody->success;
+    }
+
+	/**
+	 * @param User $user
+	 * @return bool|null
+	 */
+    public function createUser(User $user, string $rawPassword): ?bool
+    {
+        $apiResponse = Http::withHeaders(['X-Auth' => config('arvalAuth.token')])
+			->withBody(
+				json_encode([
+					'firstname' => $user->firstname,
+					'lastname' => $user->lastname,
+					'email' => $user->email,
+					'degreeBefore' => $user->degree_before,
+					'degreeAfter' => $user->degree_after,
+					'phone' => $user->phone,
+					'role' => $user->roles()->value('name'),
+					'company' => optional($user->company)->slug ?: 'arval',
+					'password' => $rawPassword,
+				]),
+				'application/json'
+			)
+            ->post(
+                sprintf(
+					'%s/api/v1/user',
+					config('arvalAuth.domains.' . Environment::getEnv())
+				),
+            )
+            ->onError(function($response) {
+				report($response->__toString());
+                dd($response);
+            })
         ;
         /**
          * @var GuzzleHttp\Psr7\Response $apiResponse
