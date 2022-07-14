@@ -268,7 +268,7 @@ class ArvalAuthService
         /**
          * @var GuzzleHttp\Psr7\Response $apiResponse
          */
-        if($apiResponse->status() != 200) {
+        if($apiResponse->status() != 201) {
             throw new ApiException('Invalid response from arval-auth API.');
         }
         $responseBody = json_decode($apiResponse->body());
