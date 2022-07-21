@@ -319,6 +319,7 @@ class ArvalAuthService
 				'lastname' => Str::before($email, '@'),
 			]);
 			$user->save();
+			$this->refreshUser($user);
 		}
 		$guard = Auth::guard('web');
 		$guard->logout();
