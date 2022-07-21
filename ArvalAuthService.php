@@ -290,6 +290,29 @@ class ArvalAuthService
     }
 
     /**
+     * @return User
+     */
+    public function loginUsingLink(): User
+    {
+        $email = urldecode(request('email', ''));
+        $token = urldecode(request('clientLoginToken', ''));
+        if(!$email) {
+            dd('Missing parameter: email');
+        }
+        if(!$token) {
+            dd('Missing parameter: clientLoginToken');
+        }
+
+		$expectedToken = $this->createClientLoginToken($email);
+		if($token != $expectedToken) {
+			dd('Invalid token/email combination.');
+		}
+
+		$user = User::whereRaw('LOWER(email) = LOWER(?)', [$email])->first();
+		return $user;
+    }
+
+    /**
      * @return JsonResponse
      */
     public function logout(): JsonResponse
@@ -317,4 +340,17 @@ class ArvalAuthService
         $arvalAuthPage = sprintf('%s?returnUrl=%s', config('arvalAuth.forgottenPasswordUrl.' . Environment::getEnv()), urlencode($returnUrl));
         return Redirect::away($arvalAuthPage);
     }
+
+	/**
+	 * @param $email
+	 * @return string
+	 */
+	private function createClientLoginToken($email): string
+	{
+		return md5(sha1(sprintf(
+			'%s|%s',
+			config('arvalAuth.loginKey'),
+			mb_strtolower(trim($email))
+		)));
+	}
 }
