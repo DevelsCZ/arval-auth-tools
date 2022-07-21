@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 
 class ArvalAuthService
 {
@@ -312,7 +313,12 @@ class ArvalAuthService
 
 		$user = User::whereRaw('LOWER(email) = LOWER(?)', [$email])->first();
 		if(!$user) {
-			dd('User not found by e-mail: ' . $email);
+			$user = new User([
+				'email' => $email,
+				'firstname' => Str::before($email, '@'),
+				'lastname' => Str::before($email, '@'),
+			]);
+			$user->save();
 		}
 		$guard = Auth::guard('web');
 		$guard->logout();
