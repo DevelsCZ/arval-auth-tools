@@ -290,11 +290,11 @@ class ArvalAuthService
         return $responseBody->success;
     }
 
-    /**
-     * @param string $afterLoginUrl
-     * @return User
-     */
-    public function loginUsingLink(string $afterLoginUrl): User
+	/**
+	 * @param string $afterLoginUrl
+	 * @return RedirectResponse
+	 */
+    public function loginUsingLink(string $afterLoginUrl): RedirectResponse
     {
         $email = urldecode(request('email', ''));
         $token = urldecode(request('clientLoginToken', ''));
