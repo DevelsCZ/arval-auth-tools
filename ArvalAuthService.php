@@ -321,7 +321,7 @@ class ArvalAuthService
 			// not present in some projects
 			if(class_exists(Company::class)) {
 				$user->fill([
-					'company_id' => 'arval',
+					'company_id' => Company::query()->value('id'),
 				]);
 			}
 			$user->save();
