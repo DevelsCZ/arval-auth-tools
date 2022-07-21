@@ -311,6 +311,9 @@ class ArvalAuthService
 		}
 
 		$user = User::whereRaw('LOWER(email) = LOWER(?)', [$email])->first();
+		if(!$user) {
+			dd('User not found by e-mail: ' . $email);
+		}
 		$guard = Auth::guard('web');
 		$guard->logout();
 		Session()->flush();
