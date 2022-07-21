@@ -10,6 +10,7 @@ use App\Services\Environment;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
@@ -290,9 +291,10 @@ class ArvalAuthService
     }
 
     /**
+     * @param string $afterLoginUrl
      * @return User
      */
-    public function loginUsingLink(): User
+    public function loginUsingLink(string $afterLoginUrl): User
     {
         $email = urldecode(request('email', ''));
         $token = urldecode(request('clientLoginToken', ''));
@@ -309,7 +311,11 @@ class ArvalAuthService
 		}
 
 		$user = User::whereRaw('LOWER(email) = LOWER(?)', [$email])->first();
-		return $user;
+		$guard = Auth::guard('web');
+		$guard->logout();
+		Session()->flush();
+		$guard->login($user);
+		return Redirect::away($afterLoginUrl);
     }
 
     /**
