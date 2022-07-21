@@ -318,6 +318,12 @@ class ArvalAuthService
 				'firstname' => Str::before($email, '@'),
 				'lastname' => Str::before($email, '@'),
 			]);
+			// not present in some projects
+			if(class_exists(Company::class)) {
+				$user->fill([
+					'company_id' => 'arval',
+				]);
+			}
 			$user->save();
 			$this->refreshUser($user);
 		}
