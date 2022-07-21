@@ -317,6 +317,7 @@ class ArvalAuthService
 				'email' => $email,
 				'firstname' => Str::before($email, '@'),
 				'lastname' => Str::before($email, '@'),
+				'password' => '',
 			]);
 			// not present in some projects
 			if(class_exists(Company::class)) {
